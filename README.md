@@ -7,8 +7,8 @@ with conserved quantum number.
 It is designed to be general and flexible. Moreover, it can construct the sparse matrix of an
 operator by simply "typing" its second quatized form. 
 
-# Example : 
-## Tight binding model of 1D free spinless-Fermion.
+## Example : 
+### Tight binding model of 1D free spinless-Fermion.
 
 In the following, I'll demonstrate how to construct the Hamiltonian matrix.
 
