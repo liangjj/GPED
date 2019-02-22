@@ -17,6 +17,8 @@ Nsite = 10 # number of sites
 
 Ne = 1 # number of electrons
 
+t = 1.0 # hopping amplitude
+
 #Specify the Hilbert space and operators
 
 BasisInfo, OperatorInfo = SpinlessFermion(Nsite)
@@ -30,8 +32,8 @@ AllBasis = BasisSet(BasisInfo, Ne)
 h = OperatorMat(OpInfo)
 
 for i in range(N-1):
-    h += [1, 'Cdag', i, 'C', i+1]
-    h += [1, 'Cdag', i+1, 'C', i, ]
+    h += [t, 'Cdag', i, 'C', i+1]
+    h += [t, 'Cdag', i+1, 'C', i, ]
     
 # convert the Hamintonian to sparse matrix format
 H = getMat(h, AllBasis)
