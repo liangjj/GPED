@@ -1,5 +1,5 @@
-from Basis import BasisInfo
-from Operator import OperatorInfo
+from GPED.BasisInfo import BasisInfo
+from GPED.OperatorInfo import OperatorInfo
 
 def torus_check_succeed(qn_curr, qn_goal, basisinfo):
     if qn_curr[0] != qn_goal[0]:

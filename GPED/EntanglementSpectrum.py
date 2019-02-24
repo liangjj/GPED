@@ -1,5 +1,5 @@
 import numpy as np
-from Basis import QN, BasisInfo
+from GPED.BasisInfo import QN, BasisInfo
 
 def QNofLeftBasis(Leftbket, BasisInfo):
     offset = BasisInfo.numBitPerSite

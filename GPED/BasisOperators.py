@@ -1,4 +1,5 @@
-from utils import BasisInfo, OperatorInfo
+from GPED.BasisInfo import BasisInfo
+from GPED.OperatorInfo import OperatorInfo
 import numpy as np
 
 def SpinlessFermion(N):

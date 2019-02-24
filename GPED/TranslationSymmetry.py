@@ -1,7 +1,10 @@
-from utils import BasisSet, OperatorMat, BasisInfo, default_check_succeed
-from Operator import __MultOp
+from GPED.BasisInfo import BasisInfo
+from GPED.OperatorMat import OperatorMat
+from GPED.getMat import __MultOp
+from GPED.BasisSet import BasisSet, default_check_succeed
+import scipy.sparse as sparse
+
 import numpy as np
-from SparseMatrix import SparseMatrix
 from multiprocessing import Pool
 from functools import partial
 
@@ -90,9 +93,10 @@ class BasisSetTS(BasisSet):
     def __init__(self, basisinfo, qn, k, T = [],
                 check_succeed = default_check_succeed, BSet = None):
         
-        # initialize the BasisSet without translational symmetry
-        #BasisSet.__init__(self, basisinfo, qn, check_succeed)
-        BasisSet.__init__(self, basisinfo, qn, check_succeed, store = BSet.store)
+        if BSet is not None:
+            BasisSet.__init__(self, basisinfo, qn, check_succeed, store = BSet.store)
+        else:
+            BasisSet.__init__(self, basisinfo, qn, check_succeed)
             
         self.storePcoeff = dict()
         
@@ -142,7 +146,6 @@ def __getMatTS_helper(ket, opCoeffSet, N, k, q, opinfo, BSet, multop):
             
     # <r|P_k|r>
     r_Pk_r = BSet.getCoeff(ket)
-        
     for OpCoeffList in opCoeffSet:
         ##############################################################
         # make sure O1*O2*....*ON|ket> != 0 (it is zero in most cases)
@@ -167,7 +170,8 @@ def __getMatTS_helper(ket, opCoeffSet, N, k, q, opinfo, BSet, multop):
             checked_pos.add(pos)
         if(stop):
             continue
-            
+        
+        
         ##############################################################
         # apply a series of operators
         #######
@@ -181,8 +185,7 @@ def __getMatTS_helper(ket, opCoeffSet, N, k, q, opinfo, BSet, multop):
             bra, c = multop[opname, position, bra]
             coeff = coeff*c
             index = index - 2
-            
-            
+        
         ##############################################################
         # P_k (H|ket>)
         #######
@@ -199,9 +202,10 @@ def __getMatTS_helper(ket, opCoeffSet, N, k, q, opinfo, BSet, multop):
                 if(Hket in BSet):
                     # <r'|P_k|r'>
                     rp_Pk_rp = BSet.getCoeff(Hket)
-                        
+                    
                     #[q/(N*sqrt(prr'*prr))*exp(-2*pi*i*jj*k*q/N)]
                     p = q/(N*np.sqrt(r_Pk_r*rp_Pk_rp+0j))*np.exp(-2.0*np.pi*1j*jj*k*q/N)
+                    
                     if Hket in M_bra_coeff:
                         M_bra_coeff[Hket] += coeff*p
                     else :
@@ -209,7 +213,7 @@ def __getMatTS_helper(ket, opCoeffSet, N, k, q, opinfo, BSet, multop):
                             
                 c, Hket = BSet.T[Hket]
                 coeff = coeff*c
-    
+                
     return [ket, M_bra_coeff]
     
 def getMatTS(OpMat, BSet):
@@ -222,12 +226,15 @@ def getMatTS(OpMat, BSet):
     multop = __MultOp(opinfo)
     
     L = [] 
-    
+    '''
+    for ket in BSet.getBasis():
+        L.append(__getMatTS_helper(ket, OpMat.opCoeffSet, N, BSet.k, BSet.q, OpMat.operatorinfo, BSet, multop))
+    '''
     with Pool() as pool:
         L = pool.map(partial(__getMatTS_helper, opCoeffSet = OpMat.opCoeffSet, N = N, k = BSet.k, q = BSet.q, 
                                              opinfo = OpMat.operatorinfo, multop = multop, BSet = BSet), BSet.getBasis() )
     D = len(BSet)
-    O = SparseMatrix((D,D), dtype = complex)
+    O = sparse.lil_matrix((D,D), dtype = complex)
     for l in L:
         i = BSet[l[0]]
         for bra in l[1].keys():

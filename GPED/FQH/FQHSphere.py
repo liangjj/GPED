@@ -1,11 +1,11 @@
 import numpy as np
-from Basis import BasisInfo
-from Operator import OperatorInfo, OperatorMat, getMat
-from multiprocessing import Pool
-from utils import setplt
+from GPED.BasisInfo import BasisInfo
+from GPED.OperatorInfo import OperatorInfo
+from GPED.OperatorMat import OperatorMat
+from GPED.utils import setplt, expVal
+from GPED.getMat import getMat
 
 import matplotlib.pyplot as plt
-setplt()
 
 # Q : monopole strength
 def FQHSphere(Q):
@@ -149,10 +149,9 @@ def Ltotal(Q, OpInfo, BSet, psis, Lz):
     # Since Lz is proportional to identity matrix by construction
     # ,we only build L+L- matrix.
 
-    BInfo = OpInfo.basisinfo
     Nphi = int(2*Q)
     
-    LpLm_Op = OperatorMat(BInfo, OpInfo)
+    LpLm_Op = OperatorMat(OpInfo)
 
     # L+L- diagonal part
     for l in range(Nphi+1):
@@ -170,10 +169,10 @@ def Ltotal(Q, OpInfo, BSet, psis, Lz):
     LpLm = getMat(LpLm_Op, BSet)
     
     L2_list = []
-    L2_to_l = L2_eig2l(Q)
+    
     for psi in psis:
-        e = (psi.getH() * LpLm.M * psi - Lz**2 - Lz)[0,0]
-        L2_list.append(L2_to_l(e))
+        e = expVal(psi, LpLm, psi) - Lz**2 - Lz
+        L2_list.append(L2_eig2l(e))
     return L2_list
 
 def Ltotal_bilayer(Q, OpInfo, BSet, psis, Lz):
@@ -182,8 +181,7 @@ def Ltotal_bilayer(Q, OpInfo, BSet, psis, Lz):
     # Since Lz is proportional to identity matrix by construction
     # ,we only build L+L- matrix.
 
-    BInfo = OpInfo.basisinfo
-    LpLm_Op = OperatorMat(BInfo, OpInfo)
+    LpLm_Op = OperatorMat(OpInfo)
     Nphi = int(2*Q)
     
     # L+L- diagonal part
@@ -205,12 +203,12 @@ def Ltotal_bilayer(Q, OpInfo, BSet, psis, Lz):
     
     L2_list = []
     for psi in psis:
-        e = (psi.getH() * LpLm.M * psi - Lz**2 - Lz)[0,0]
+        e = expVal(psi, LpLm, psi) - Lz**2 - Lz
         L2_list.append(L2_eig2l(e))
     return L2_list
 
 
-def plot_ES_conserveSz(q,s,ES,title = '', ylabel = None):
+def plot_ES_conserveSz(q,s,ES):
     K = []
     xi = []
     for es in ES:
@@ -218,15 +216,11 @@ def plot_ES_conserveSz(q,s,ES,title = '', ylabel = None):
             K.append(es[0][1])
             xi.append(es[1])
     
-    plt.scatter(K, xi, alpha = 0.5, marker = '.')
-    plt.xlabel(r'$L_z$')
-    if(ylabel is not None):
-        plt.ylabel(ylabel)
-    plt.title(title)
-    plt.ylim(-1,10)
+    plt.scatter(K, xi, alpha = 0.5)
     
     
-def plot_ES(q,ES,title = '', xlim = None, ylabel = None):
+def plot_ES(q,ES):
+    setplt()
     K = []
     xi = []
     for es in ES:
@@ -234,11 +228,4 @@ def plot_ES(q,ES,title = '', xlim = None, ylabel = None):
             K.append(es[0][1])
             xi.append(es[1])
     
-    plt.scatter(K, xi, alpha = 0.5, marker = '.')
-    plt.xlabel(r'$L_z$')
-    if(ylabel is not None):
-        plt.ylabel(ylabel)
-    plt.title(title)
-    plt.ylim(-1,20)
-    if xlim is not None:
-        plt.xlim(xlim)
+    plt.scatter(K, xi, alpha = 0.5)

@@ -1,4 +1,4 @@
-from Basis import QN, BasisInfo
+from GPED.BasisInfo import QN, BasisInfo
 import numpy as np
 from scipy.special import comb
 
@@ -68,6 +68,9 @@ class BasisSet:
         for b in orderStore.keys():
             s = s + str(b)+'\t' + self.BasisInfo.toStrRep(orderStore[b]) + '\t' + str(orderStore[b]) + '\n'
         return s
+    
+    def __contains__(self, k):
+        return k in self.store
     
     # initialize the roots
     def findroots(self):
@@ -157,7 +160,7 @@ class BasisSet:
             else :
                 
                 visited.add(root)
-                if(self.check_succeed(self.BasisInfo.getQN(root), self.qn_goal)):
+                if(self.check_succeed(self.BasisInfo.getQN(root), self.qn_goal, self.BasisInfo)):
                     allBasis[root] = len(allBasis)
             
             for neig in neighbor(root):
