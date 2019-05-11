@@ -38,3 +38,4 @@ for i in range(N-1):
 # convert the Hamintonian to sparse matrix format
 H = getMat(h, AllBasis)
 ```
+The Hamiltonian H is a scipy object. One can use the SciPy sparse matrix package to compute energy spectrum, time evolution and observable ...etc.
