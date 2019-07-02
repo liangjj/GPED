@@ -17,7 +17,7 @@ def lowestEigs(M, k = 10):
     E, V = eigsh(M.tocsc(), k = k , which = 'SA',maxiter=10000000)
     psi = []
     for i in range(len(V[0,:])):
-        psi.append((np.transpose(np.matrix(V[:,i])))
+        psi.append((np.transpose(np.matrix(V[:,i]))))
         
     E, psi = sort_together([E, psi])
     return E, psi
