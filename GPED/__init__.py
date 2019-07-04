@@ -15,3 +15,4 @@ from GPED.FQH.FQHTorus import *
 from GPED.FQH.FQHTorusMatEle import FQHTorusMatEle
 
 from GPED.BasisOperators import *
+from GPED.PartialTrace import *
