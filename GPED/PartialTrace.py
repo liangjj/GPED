@@ -44,7 +44,7 @@ class PartialTrace:
                 col_p1, col_p2 = self.BSet_split[col]
 
                 if row_p2 == col_p2:
-                    rho[self.BSet_reduced[row_p1], self.BSet_reduced[col_p1]] += np.conj(psi[i][0,0])*psi[j][0,0]
+                    rho[self.BSet_reduced[row_p1], self.BSet_reduced[col_p1]] += psi[i][0,0]*np.conj(psi[j][0,0])
 
         return rho
 
