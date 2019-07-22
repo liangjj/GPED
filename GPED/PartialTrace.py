@@ -26,25 +26,33 @@ class PartialTrace:
         self.BSet = BSet
         self.keep_region = keep_region
         self.offset = BSet.BasisInfo.numBitPerSite
-        self.BSet_split = dict()
         self.BSet_reduced = dict()
+        #
+        self.PTInfo = dict()
+        
+        # PTInfo[p2] = (index, index_reduced)
         for b in BSet.store.keys():
-            self.BSet_split[b] = split_basis(self.BSet.BasisInfo, b, keep_region)
-            if self.BSet_split[b][0] not in self.BSet_reduced:
-                self.BSet_reduced[self.BSet_split[b][0]] = len(self.BSet_reduced)
-
-    def __getitem__(self, psi):
-        rho = scipy.sparse.lil_matrix((len(self.BSet_reduced), len(self.BSet_reduced)), dtype=complex)
-
-        for row in self.BSet.store.keys():
-            for col in self.BSet.store.keys():
-                i = self.BSet[row]
-                j = self.BSet[col]
-                row_p1, row_p2 = self.BSet_split[row]
-                col_p1, col_p2 = self.BSet_split[col]
-
-                if row_p2 == col_p2:
-                    rho[self.BSet_reduced[row_p1], self.BSet_reduced[col_p1]] += psi[i][0,0]*np.conj(psi[j][0,0])
-
-        return rho
+            p1, p2 = split_basis(self.BSet.BasisInfo, b, keep_region)
+            
+            if p2 not in self.PTInfo:
+                self.PTInfo[p2] = []
+            if p1 not in self.BSet_reduced:
+                self.BSet_reduced[p1] = len(self.BSet_reduced)
+                
+            self.PTInfo[p2].append((BSet[b], self.BSet_reduced[p1]))
+            
+            
+    def __getitem__(self, rho):
+        
+        if rho.shape[1] == 1:
+            rho = rho*np.transpose(np.conjugate(rho))
+            
+        rho_reduced = np.matrix(np.zeros((len(self.BSet_reduced), len(self.BSet_reduced)), dtype=complex))
+        
+        for p2 in self.PTInfo.keys():
+            for (row_index, row_index_reduced) in self.PTInfo[p2]:
+                for (col_index, col_index_reduced) in self.PTInfo[p2]:
+                    rho_reduced[row_index_reduced, col_index_reduced] += rho[row_index, col_index]
+                
+        return rho_reduced
 
