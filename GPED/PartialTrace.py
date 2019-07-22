@@ -36,12 +36,12 @@ class PartialTrace:
             if p2 not in self.PTInfo:
                 self.PTInfo[p2] = []
                 
+            if p1 not in BSet_reduced_store:
+                BSet_reduced_store[p1] = len(BSet_reduced_store)
+            
             self.PTInfo[p2].append((BSet[b], BSet_reduced_store[p1]))
             
-            if p1 not in BSet_reduced:
-                BSet_reduced_store[p1] = len(BSet_reduced_store)
-                
-        self.BSet_reduced = BasisSet(BSet.BasisInfo, BSet_reduced_store)
+        self.BSet_reduced = BasisSet(BSet.BasisInfo, store=BSet_reduced_store)
         
     def __getitem__(self, rho):
         
