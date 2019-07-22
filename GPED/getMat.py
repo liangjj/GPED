@@ -109,12 +109,17 @@ def __OpMat2matele_helper(ket, opCoeffSet, opinfo):
     return [ket, M_bra_coeff]
 
 
-def getMat(OpMat, BSet):
+def getMat(OpMat, BSet, multiprocessing = True):
     
-    with Pool() as pool:
-        L = pool.map(partial(__OpMat2matele_helper, opCoeffSet = OpMat.opCoeffSet, 
+    if(multiprocessing):
+        with Pool() as pool:
+            L = pool.map(partial(__OpMat2matele_helper, opCoeffSet = OpMat.opCoeffSet, 
                                   opinfo = OpMat.operatorinfo), BSet.getBasis())
-        
+    else:
+        L = []
+        for ket in BSet.getBasis():
+            L.append(__OpMat2matele_helper(ket, OpMat.opCoeffSet, OpMat.operatorinfo))
+            
     D = len(BSet)
     
     O = sparse.lil_matrix((D, D), dtype = OpMat.dtype)
