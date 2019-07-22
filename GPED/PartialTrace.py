@@ -22,26 +22,27 @@ def split_basis(BInfo, ket, keep_region):
 class PartialTrace:
     def __init__(self, BSet, keep_region):
         ## BSet_split : bset --dict--> p1,p2
-        ## reduced BSet : p1 -> index
-        self.BSet = BSet
         self.keep_region = keep_region
-        self.offset = BSet.BasisInfo.numBitPerSite
-        self.BSet_reduced = dict()
-        #
+        
+        ## reduced BSet : p1 -> index
+        BSet_reduced_store = dict()
+        
+        ## PTInfo[p2] = (index, index_reduced)
         self.PTInfo = dict()
         
-        # PTInfo[p2] = (index, index_reduced)
         for b in BSet.store.keys():
-            p1, p2 = split_basis(self.BSet.BasisInfo, b, keep_region)
+            p1, p2 = split_basis(BSet.BasisInfo, b, keep_region)
             
             if p2 not in self.PTInfo:
                 self.PTInfo[p2] = []
-            if p1 not in self.BSet_reduced:
-                self.BSet_reduced[p1] = len(self.BSet_reduced)
                 
-            self.PTInfo[p2].append((BSet[b], self.BSet_reduced[p1]))
+            self.PTInfo[p2].append((BSet[b], BSet_reduced_store[p1]))
             
-            
+            if p1 not in BSet_reduced:
+                BSet_reduced_store[p1] = len(BSet_reduced_store)
+                
+        self.BSet_reduced = BasisSet(BSet.BasisInfo, BSet_reduced_store)
+        
     def __getitem__(self, rho):
         
         if rho.shape[1] == 1:
